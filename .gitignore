@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# external
+.idea/
+synthetic_dataset/
+*.pth
+
 # Distribution / packaging
 .Python
 build/
