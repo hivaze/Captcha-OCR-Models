@@ -65,24 +65,31 @@ class OCRDataset(Dataset):
     labels_file = 'labels.txt'
 
     train_transforms = A.Compose([
-        A.RandomScale(scale_limit=(-0.4, 0.0), p=0.4),
-        A.PadIfNeeded(min_height=64, min_width=30,
-                      border_mode=cv2.BORDER_CONSTANT, value=(255, 255, 255)),
-        A.Lambda(image=add_black_lines, p=0.3),
-        A.GaussianBlur(p=0.5),
+        A.Compose([  # Rescale transform
+            A.RandomScale(scale_limit=(-0.3, -0.1), always_apply=True),
+            A.PadIfNeeded(min_height=64, min_width=30,
+                          border_mode=cv2.BORDER_CONSTANT, value=(255, 255, 255), always_apply=True),
+            A.Rotate(limit=4, p=0.5, crop_border=True),
+        ], p=0.4),
+        A.Lambda(image=add_black_lines, p=0.3),  # Add lines to image
+        A.GaussianBlur(blur_limit=(1, 7), p=0.5),
+        A.OneOf([  # Geometric transforms
+            A.GridDistortion(always_apply=True, num_steps=7, distort_limit=0.5,
+                             border_mode=cv2.BORDER_CONSTANT, value=(255, 255, 255), normalized=True),
+            A.OpticalDistortion(always_apply=True, border_mode=cv2.BORDER_CONSTANT, value=(255, 255, 255)),
+            A.Perspective(scale=0.1, always_apply=True, fit_output=True, pad_val=(255, 255, 255))
+        ], p=0.7),
+        A.RGBShift(p=0.5, r_shift_limit=90, g_shift_limit=90, b_shift_limit=90),
         A.ISONoise(p=0.1),
-        A.RGBShift(p=0.4, r_shift_limit=90, g_shift_limit=90, b_shift_limit=90),
-        A.Rotate(limit=3, p=0.2, crop_border=True),
-        A.GridDistortion(p=0.6, num_steps=7, distort_limit=0.5, normalized=True),
         A.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.3, p=0.4),
         A.ImageCompression(quality_lower=30, p=0.2),
-        A.GaussNoise(var_limit=60, p=0.3),
+        A.GaussNoise(var_limit=70, p=0.3),
     ])
 
     basic_transforms = A.Compose([
-        A.Resize(64, 256),
+        A.Resize(64, 256, interpolation=cv2.INTER_CUBIC, always_apply=True),
         # A.Normalize(),  # Вобще никакие нормализации не нужны за счет BatchNorm2d
-        A.ToFloat(max_value=255.0),
+        A.ToFloat(max_value=255.0, always_apply=True),
         ToTensorV2(),
     ])
 
