@@ -73,7 +73,7 @@ class OCRDataset(Dataset):
         A.ISONoise(p=0.1),
         A.RGBShift(p=0.4, r_shift_limit=90, g_shift_limit=90, b_shift_limit=90),
         A.Rotate(limit=3, p=0.2, crop_border=True),
-        A.GridDistortion(p=0.6, normalized=True),
+        A.GridDistortion(p=0.6, num_steps=7, distort_limit=0.5, normalized=True),
         A.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.3, p=0.4),
         A.ImageCompression(quality_lower=30, p=0.2),
         A.GaussNoise(var_limit=60, p=0.3),

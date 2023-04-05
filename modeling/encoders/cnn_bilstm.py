@@ -1,4 +1,27 @@
+import torch
 import torch.nn as nn
+
+
+class RMSNorm(nn.Module):
+    """Root Mean Square Layer Normalization.
+    Derived from https://github.com/bzhangGo/rmsnorm/blob/master/rmsnorm_torch.py. BSD 3-Clause License:
+    https://github.com/bzhangGo/rmsnorm/blob/master/LICENSE.
+    """
+
+    def __init__(self, size: int, dim: int = -1, eps: float = 1e-5) -> None:
+        super().__init__()
+        self.scale = nn.Parameter(torch.ones(size))
+        self.eps = eps
+        self.dim = dim
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # NOTE: the original RMSNorm paper implementation is not equivalent
+        # norm_x = x.norm(2, dim=self.dim, keepdim=True)
+        # rms_x = norm_x * d_x ** (-1. / 2)
+        # x_normed = x / (rms_x + self.eps)
+        norm_x = torch.mean(x * x, dim=self.dim, keepdim=True)
+        x_normed = x * torch.rsqrt(norm_x + self.eps)
+        return self.scale * x_normed
 
 
 class ConvBlock(nn.Module):
@@ -83,7 +106,7 @@ class BiLSTMImageDecoder(nn.Module):
 
     def __init__(self, in_dim, hidden_dim, vocab_size, lstm_layers, dropout=0.1):
         super().__init__()
-        self.norm = nn.LayerNorm(in_dim)
+        self.norm = nn.BatchNorm1d(64)
         self.rnn = nn.LSTM(in_dim, hidden_dim, num_layers=lstm_layers, dropout=dropout, bidirectional=True,
                            batch_first=False)
         self.out_proj = nn.Linear(hidden_dim * 2, vocab_size)
@@ -116,7 +139,7 @@ class SelfAttenBiLSTMImageDecoder(nn.Module):
 
     def __init__(self, in_dim, hidden_dim, vocab_size, num_heads, lstm_layers, dropout=0.1):
         super().__init__()
-        self.norm = nn.LayerNorm(in_dim)
+        self.norm = nn.BatchNorm1d(64)
         self.self_atten = nn.MultiheadAttention(in_dim, num_heads, dropout, batch_first=False)
         self.rnn = nn.LSTM(in_dim, hidden_dim, num_layers=lstm_layers, dropout=dropout, bidirectional=True,
                            batch_first=False)
@@ -151,7 +174,7 @@ class CrossAttenBiLSTMImageDecoder(nn.Module):
 
     def __init__(self, in_dim, hidden_dim, vocab_size, num_heads, lstm_layers, dropout=0.1):
         super().__init__()
-        self.norm = nn.LayerNorm(in_dim)
+        self.norm = nn.BatchNorm1d(64)
         self.rnn = nn.LSTM(in_dim, hidden_dim, num_layers=lstm_layers, dropout=dropout, bidirectional=True,
                            batch_first=False)
         self.cross_atten = nn.MultiheadAttention(embed_dim=hidden_dim * 2, kdim=in_dim,
