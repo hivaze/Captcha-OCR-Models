@@ -6,7 +6,7 @@ class BiLSTMImageDecoder(nn.Module):
 
     def __init__(self, in_dim, hidden_dim, vocab_size, lstm_layers, dropout=0.1):
         super().__init__()
-        self.norm = nn.BatchNorm1d(65)
+        self.norm = nn.LayerNorm(in_dim)
         self.rnn = nn.LSTM(in_dim, hidden_dim, num_layers=lstm_layers, dropout=dropout, bidirectional=True,
                            batch_first=False)
         self.out_proj = nn.Linear(hidden_dim * 2, vocab_size)
@@ -37,7 +37,7 @@ class OCR_ViTRNN(nn.Module):
         return x
 
 
-class OCR_ViT(nn.Module):
+class OCR_SoloViT(nn.Module):
 
     def __init__(self, vit_config: ViTConfig, vocab_size: int):
         super().__init__()
