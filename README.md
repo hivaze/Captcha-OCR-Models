@@ -1,10 +1,12 @@
 # Captcha-OCR-Models
-Different OCR models implementations in PyTorch \
-(CNN-RNN, CNN-Transformer, ViT-RNN)
+This is my pet project, the task of which I set as much as possible to complicate 
+the OCR task by equating it with solving captcha.
+I implement and train some models, then compare them on the task.
 
 ## Data
 
 Dataset is collected using synthetic generator [trdg](https://github.com/Belval/TextRecognitionDataGenerator).
+For captcha-augmentations, the `albumentations` library is used.
 
 Generated images contain several different types of fonts, should consist of a maximum of two words and contain 
 Latin letters and Arabic numerals, without special characters. Size is 64px in height and variable width.
@@ -50,14 +52,38 @@ as well as random curved lines crossing the image.
 
 ## Models result
 
-CRNN cnn_v2_128_64seq_lstm_2l_100e \
-Clean Test: (0.06764, 0.19687, 0.04471)
-Captchas Test: (0.1209, 0.25071, 0.05986)
+Models are broken down into: 
+encoder-based (one forward) and seq2seq-based (2 forwards)
 
-CARNN cnn_v2_128_64seq_alstm_2h_2l_80e \
-Clean Test: 0.08446, 0.19403, 0.04476 \
-Captchas Test: 0.17378, 0.27079, 0.06931
+### Encoder-based
 
-VITRNN vit_128_512_6l_2h_65seq_lstm_2l_400e \
-Clean Test: 0.52554, 0.85327, 0.38014 \
-Captchas Test: 0.7041, 0.87289, 0.41252
+CTCLoss is used to train these models. \
+Implementations are in `modeling.encoders`
+
+Training notebook: `ctc_trainin.ipynb`
+
+#### CRNN cnn_v2_128_64seq_lstm_2l_100e
+Clean Test: 0.09644, 0.24037, 0.0532) \
+Captchas Test: 0.1445, 0.29487, 0.07253)
+
+#### CNNBERT cnn_v2_128_64seq_bert_4h_3l_100e \
+Clean Test: 0.08731, 0.50241, 0.12054 \
+Captchas Test: 0.1443, 0.54003, 0.13632
+
+#### ResNetRNN resnet18_128_lstm_2l_100e
+Clean Test: 0.09526, 0.26832, 0.06179 \
+Captchas Test: 0.15172, 0.31687, 0.08084
+
+#### ResNetRNN resnet34_128_lstm_2l_100e
+Clean Test: 0.0897, 0.22237, 0.05195 \
+Captchas Test: 0.13997, 0.27212, 0.07055
+
+#### ResNetRNN resnet50_256_lstm_2l_100e
+Clean Test:  0.09287, 0.24386, 0.05388 \
+Captchas Test: 0.13561, 0.29682, 0.07257
+
+### Seq2Seq-based
+
+Experiment notebook: `trocr_seq2seq_playground.ipynb`
+
+TODO: TrOCR in work
