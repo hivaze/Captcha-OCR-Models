@@ -62,8 +62,10 @@ Implementations are in `modeling.encoders`
 
 Training notebook: `ctc_trainin.ipynb`
 
+Metrics are in format: **CTCLoss, WER, CER**
+
 #### CRNN cnn_v2_128_64seq_lstm_2l_100e
-Clean Test: 0.09644, 0.24037, 0.0532) \
+Clean Test: 0.09644, 0.24037, 0.0532 \
 Captchas Test: 0.1445, 0.29487, 0.07253)
 
 #### CNNBERT cnn_v2_128_64seq_bert_4h_3l_100e \
